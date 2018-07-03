@@ -1,0 +1,30 @@
+{
+    "name": "phfoxer/apigenerate",
+    "description": "Easy api generate for the Laravel Framework.",
+    "keywords": [
+        "laravel",
+        "api",
+        "gerator",
+        "console",
+        "artisan",
+        "generate api"
+    ],
+    "homepage": "http://github.com/phfoxer/apigenerate",
+    "license": "MIT",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Paulo Santos",
+            "email": "paulohs.dev@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.1",
+        "doctrine/dbal": "^2.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "Phfoxer\\ApiGenerate\\": "src"
+        }
+    }
+}
