@@ -1,5 +1,7 @@
 # phfoxer/apigenerate
 Easy api generate for the Laravel Framework.
+![Alt Text](https://i.giphy.com/media/5pWMVN7HlEebUY0yG6/giphy.mp4)
+
 ## Installation
 
 ```bash
