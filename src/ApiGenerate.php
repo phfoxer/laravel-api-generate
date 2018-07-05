@@ -77,6 +77,7 @@ class ApiGenerate extends Command
         $packageLower = strtolower($package);
 $controller = '<?php
 namespace App\\'.$module.'\\'.$package.'\Controllers;
+
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\\'.$module.'\\'.$package.'\Repositories\\'.$package.'Repository;
@@ -84,9 +85,11 @@ use App\\'.$module.'\\'.$package.'\Repositories\\'.$package.'Repository;
 class '.$package.'Controller extends Controller
 {
     private $'.$packageLower.'Repository;
+
     function __construct('.$package.'Repository $'.$packageLower.'Repository ){
         $this->'.$packageLower.'Repository = $'.$packageLower.'Repository;
     }
+
     public function index(Request $request){
         try {
             $data =  $this->'.$packageLower.'Repository->index($request);
@@ -266,9 +269,8 @@ class '.$package.'SearchRepository
     }
 }';
 
-    
     if (!is_dir($app)) {
-        $this->info('O modulo '.$module.' nao existe');
+        $this->info('The module '.$module.' not exists');
         die;
     }
     $mod = $app.$package;
@@ -288,9 +290,9 @@ class '.$package.'SearchRepository
 		File::put($mod.DIRECTORY_SEPARATOR.'Repositories'.DIRECTORY_SEPARATOR.$package.'Repository.php', $repository);
 		File::put($mod.DIRECTORY_SEPARATOR.'Repositories'.DIRECTORY_SEPARATOR.$package.'SearchRepository.php', $repositorySearch);
 		//
-		$this->info('Modulo '.$package.' criado com successo');
+		$this->info('The module '.$package.' already exists!');
 	} else {
-		$this->info('O pacote '.$package.' ja existe');
+		$this->info('The package '.$package.' already exists!');
 	}
 
     if ($route) {
@@ -302,12 +304,12 @@ class '.$package.'SearchRepository
 $routes =
 '
 /**
-* Modulo '.$package.'
+* Module '.$package.'
 */
 Route::apiResource("'.$route.'","'.$base_package.'\Controllers\\'.$ctrl.'");';
 //
         File::append($path_route, $routes);
-        $this->info('Rotas criadas com successo');
+        $this->info('Routes created!');
     }
 
 
@@ -351,10 +353,10 @@ Route::apiResource("'.$route.'","'.$base_package.'\Controllers\\'.$ctrl.'");';
             }
 
         }
-        return '
-        public function '.$table.'(){
+return '
+    public function '.$table.'(){
         return $this->hasMany("'.$model.'","id","'.$field.'");
-        }
-        ';
+    }
+';
     }
 }
