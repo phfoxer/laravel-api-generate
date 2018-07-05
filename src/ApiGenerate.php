@@ -188,9 +188,7 @@ class '.$package.' extends Model
 {
     protected $table    = "'.$table.'";
     protected $fillable = ['.$fields.'];
-
 '.$relations.'
-
 }';
 
 // campos validos
@@ -290,7 +288,8 @@ class '.$package.'SearchRepository
 		File::put($mod.DIRECTORY_SEPARATOR.'Repositories'.DIRECTORY_SEPARATOR.$package.'Repository.php', $repository);
 		File::put($mod.DIRECTORY_SEPARATOR.'Repositories'.DIRECTORY_SEPARATOR.$package.'SearchRepository.php', $repositorySearch);
 		//
-		$this->info('The module '.$package.' already exists!');
+		$this->info('The module '.$package.' has created!');
+		$this->info('check in '.$mod);
 	} else {
 		$this->info('The package '.$package.' already exists!');
 	}
