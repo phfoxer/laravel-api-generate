@@ -1,7 +1,6 @@
 # phfoxer/apigenerate
 API Rest gerator for Laravel Framework.
-Create your api resource in seconds using only your database table name.
-![](http://inovaapp.com/phfoxer.laravel.api.generate.gif)
+Create your api resource in seconds using only your database table name or connection name.
 
 ## Installation
 
@@ -24,8 +23,12 @@ Install the service provider:
 
 ### Creating a new resource
 
-To create a new api resource run this command:
+To create all API Rest resources run this command:
+```php
+artisan generate:api --con=conection_name
+```
 
+To create a new api resource run this command:
 ```php
 artisan generate:api --table=table_name
 ```
@@ -46,10 +49,6 @@ To define module name:
 artisan generate:api --table=table_name --route=my-custom-route --module=Exemple
 ```
 You can find your new resource in app/Modules/Exemple.
-
-## About Phfoxer
-
-Phfoxer is a brazilian developer, Salvador, Bahia :).
 
 ## Postcardware
 

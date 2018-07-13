@@ -1,19 +1,20 @@
 <?php
-
 namespace Phfoxer\ApiGenerate;
 
+use Phfoxer\ApiGenerate\DbSettings;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
 
 class ApiGenerate extends Command
 {
+    protected $dbSettings;
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'generate:api {--table=}  {--route=0}  {--module=0}';
+    protected $signature = 'generate:api {--table=0}  {--route=0}  {--module=0} {--con=0}';
 
     /**
      * The console command description.
@@ -42,7 +43,32 @@ class ApiGenerate extends Command
         $table  = $this->option('table');
         $route  = $this->option('route');
         $module = $this->option('module');
+        $con     = $this->option('con');
 
+        if($con=='0'){
+            $this->makeModule($table, $route, $module);
+        } else {
+            $this->dbSettings = new DbSettings($con);
+            $tables = $this->dbSettings->getTables();
+            if (!empty($tables)) {
+                foreach ($tables as $tableName) {
+                    $this->makeModule($tableName, $tableName, $module, $con);
+                }
+            } else {
+		        $this->info('Empty connection '.$con.'!');
+            }
+            
+
+        }
+    /**
+     * Execute the console command.
+     *
+     * @return mixed
+     */
+    }
+
+    private function makeModule($table, $route='0', $module='0', $con=false)
+    {
         $module = ($module=='0')? 'General' : $module;
         $route  = ($route=='0')? $table : $route;
 
@@ -53,11 +79,12 @@ class ApiGenerate extends Command
             mkdir($root.'Modules'.DIRECTORY_SEPARATOR.'General',0755);
         }
 
-        if (strlen($table)==0) {
+        if (empty($table)) {
             $this->info("Table name not found! use --table=table_name");
             die;
         }
-        if (!$route) {
+
+        if (empty($route)) {
             $this->info("Route name not found! use --route=route-name");
             die;
         }    
@@ -66,14 +93,8 @@ class ApiGenerate extends Command
         }else {
             $module = 'Modules';
         }
-        $package = ucfirst($table);
-        if(substr_count($table, '_')){
-            $split = explode('_',$table);
-            $package = '';
-            foreach ($split as $key => $value) {
-                $package .= ucfirst($value);
-            }
-        }
+        $package = $this->setPackage($table);
+        
         $packageLower = strtolower($package);
 $controller = '<?php
 namespace App\\'.$module.'\\'.$package.'\Controllers;
@@ -171,12 +192,15 @@ class '.$package.'Controller extends Controller
         }
 
         $relations = '';
+ 
         $with = [];
-
         foreach ($filtersFields as $field) {
-            $relations .= $this->findModels($module,$field);
-            if (substr_count($field,'_id')) {
-            $with[] = str_replace('_id','',$field);
+            if(substr($field, -3)=='_id') {
+                $verify = $this->findModels($module,$field, (($con)? true : false));
+                if($verify){
+                    $relations .= $verify;
+                    $with[] = str_replace('_id','',$field);
+                }
             }
         }
 
@@ -202,6 +226,11 @@ foreach ($filtersFields as $field) {
 $dbFieldsTxt .= '
         ];';
 
+    $allRelations ='';
+    if(!empty($with)){
+        $allRelations = '"'.implode('","',$with).'"';
+    }
+
 $repository = '<?php
 namespace App\\'.$module.'\\'.$package.'\Repositories;
 use App\\'.$module.'\\'.$package.'\Models\\'.$package.';
@@ -217,7 +246,7 @@ class '.$package.'Repository
     }
 
     public function index(Request $request){
-        return $this->'.$packageLower.'SearchRepository->search('.$package.'::with(["'.implode('","',$with).'"]), $request);
+        return $this->'.$packageLower.'SearchRepository->search('.$package.'::with(['.$allRelations.']), $request);
     }
 
     public function show($id){
@@ -314,9 +343,9 @@ Route::apiResource("'.$route.'","'.$base_package.'\Controllers\\'.$ctrl.'");';
 
     }
 
-    private function findModels($module, $field)
+    private function findModels($module, $field, $all = false)
     {
-        if (substr_count($field,'_id')==0) {
+        if(substr($field, -3)!='_id'){
             return false;
         }
         $table = str_replace('_id','',$field);
@@ -352,10 +381,27 @@ Route::apiResource("'.$route.'","'.$base_package.'\Controllers\\'.$ctrl.'");';
             }
 
         }
-return '
+        if(empty($model) && $all===true){
+            $package = $this->setPackage($table);
+            // Alternative model
+            $model = "App\Modules\General\\$package\Models\\$package";
+        }
+return (!empty($model)) ? '
     public function '.$table.'(){
         return $this->hasMany("'.$model.'","id","'.$field.'");
     }
-';
+' : false;
+    }
+
+    private function setPackage($table){
+        $package = ucfirst($table);
+        if(substr_count($table, '_')){
+            $split = explode('_',$table);
+            $package = '';
+            foreach ($split as $key => $value) {
+                $package .= ucfirst($value);
+            }
+        }
+        return $package;
     }
 }
