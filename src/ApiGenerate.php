@@ -43,12 +43,13 @@ class ApiGenerate extends Command
         $table  = $this->option('table');
         $route  = $this->option('route');
         $module = $this->option('module');
-        $con     = $this->option('con');
-
-        if($con=='0'){
+        $conn   = $this->option('con');
+    
+        if($conn=='0'){
             $this->makeModule($table, $route, $module);
         } else {
-            $this->dbSettings = new DbSettings($con);
+            $this->dbSettings = new DbSettings;
+            $this->con = $conn;
             $tables = $this->dbSettings->getTables();
             if (!empty($tables)) {
                 foreach ($tables as $tableName) {
@@ -57,8 +58,6 @@ class ApiGenerate extends Command
             } else {
 		        $this->info('Empty connection '.$con.'!');
             }
-            
-
         }
     /**
      * Execute the console command.
@@ -143,10 +142,11 @@ class '.$package.'Controller extends Controller
             return response()->json($data, 200);
         } catch(\Exception $e){
             $data = [
-                "message"=> "Error, try again!",
-                "text"=>    $e->getMessage()
+                "message "=> "Error, try again!",
+                "code" => $e->getCode(),
+                "text "=>    $e->getMessage()
             ];
-            return response()->json($data, 400);
+            return response()->json($data, ($e->getCode()==0) ? 400 : $e->getCode());
         }
     }
 
@@ -156,10 +156,11 @@ class '.$package.'Controller extends Controller
             return response()->json($data, 200);
         } catch(\Exception $e){
             $data = [
-                "message"=> "Error, try again!",
-                "text"=>    $e->getMessage()
+                "message" => "Error, try again!",
+                 "code" => $e->getCode(),
+                "text" =>    $e->getMessage()
             ];
-            return response()->json($data, 400);
+            return response()->json($data, ($e->getCode()==0) ? 400 : $e->getCode());
         }
     }
 
@@ -177,22 +178,18 @@ class '.$package.'Controller extends Controller
     }
 
 }';
-
-        /**
-        *
-        */
+        # get list of fields
         $columns = Schema::getColumnListing($table);
         $filtersFields = (array) $columns;
+        // exclude laravel fields
+        $filtersFields = array_diff($filtersFields, ["created_at", "updated_at"]);
         $fields = "";
-        $fields = "'".implode("','", (array) $columns)."'";
-
+        $fields = "'".implode("','",$filtersFields)."'";
         if (count($columns)==0) {
             echo "The table ".$table." not exists!";
             die;
         }
-
         $relations = '';
- 
         $with = [];
         foreach ($filtersFields as $field) {
             if(substr($field, -3)=='_id') {
@@ -203,7 +200,6 @@ class '.$package.'Controller extends Controller
                 }
             }
         }
-
         $model = '<?php
 namespace App\\'.$module.'\\'.$package.'\Models;
 use Illuminate\Database\Eloquent\Model;
@@ -215,27 +211,39 @@ class '.$package.' extends Model
 '.$relations.'
 }';
 
-// campos validos
+// Fields array
 $dbFieldsTxt = '$data = [';
 foreach ($filtersFields as $field) {
-    if(!in_array($field,['id','created_at','updated_at'])){
+    if(!in_array($field,['id'])){
         $dbFieldsTxt .= '
             "'.$field.'"=>$request->'.$field.',';
     }
 }
 $dbFieldsTxt .= '
-        ];';
+            ];';
 
     $allRelations ='';
     if(!empty($with)){
         $allRelations = '"'.implode('","',$with).'"';
     }
+// Validator
+$this->dbSettings = new DbSettings();
+$tableProp = $this->dbSettings->getTableProp($table);
+$Validator = '$validator = Validator::make($request->all(), [';
+foreach ($tableProp as $prop) {
+    if(!in_array($prop[0]['name'], ["id","created_at", "updated_at"])){
+        $Validator .= '
+            "'.$prop[0]['name'].'"=>"'.(($prop[0]['nullable']=='yes')? 'required' : 'nullable' ).'",';
+    }
+}
+$Validator .= '
+        ]);';
 
 $repository = '<?php
 namespace App\\'.$module.'\\'.$package.'\Repositories;
 use App\\'.$module.'\\'.$package.'\Models\\'.$package.';
 use App\\'.$module.'\\'.$package.'\Repositories\\'.$package.'SearchRepository;
-
+use Validator;
 use Illuminate\Http\Request;
 
 class '.$package.'Repository
@@ -254,13 +262,23 @@ class '.$package.'Repository
     }
 
     public function store($request){
-        '.$dbFieldsTxt.'
-    	return '.$package.'::create($data);
+        '.$Validator.'
+        if($validator->fails()){
+            throw new \Exception("invalid_fields",400);
+        } else {
+            '.$dbFieldsTxt.'
+            return '.$package.'::create($data);
+        }
     }
 
     public function update($request, $id){
-        '.$dbFieldsTxt.'
-    	return '.$package.'::where(["id"=>$id])->update($data);
+        '.$Validator.'
+        if($validator->fails()){
+            throw new \Exception("invalid_fields",400);
+        } else {
+            '.$dbFieldsTxt.'
+            return '.$package.'::where(["id"=>$id])->update($data);
+        }
     }
 
     public function destroy($id){

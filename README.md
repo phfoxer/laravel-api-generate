@@ -23,7 +23,7 @@ Install the service provider:
 
 ### Creating a new resource
 
-To create all API Rest resources run this command:
+To create all API Rest resources run this command (Only postgres and mysql):
 ```php
 artisan generate:api --con=conection_name
 ```
