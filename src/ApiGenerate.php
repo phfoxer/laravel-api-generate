@@ -54,10 +54,10 @@ class ApiGenerate extends Command
             $tables = $this->dbSettings->getTables();
             if (!empty($tables)) {
                 foreach ($tables as $tableName) {
-                    $this->makeModule($tableName, $tableName, $module, $con, $hasRelation);
+                    $this->makeModule($tableName, $tableName, $module, $conn, $hasRelation);
                 }
             } else {
-		        $this->info('Empty connection '.$con.'!');
+		        $this->info('Empty connection '.$conn.'!');
             }
         }
     /**
