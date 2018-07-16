@@ -14,7 +14,7 @@ class ApiGenerate extends Command
      *
      * @var string
      */
-    protected $signature = 'generate:api {--table=0}  {--route=0}  {--module=0} {--con=0}';
+    protected $signature = 'generate:api {--table=0}  {--route=0}  {--module=0} {--con=0} {--relation=0}';
 
     /**
      * The console command description.
@@ -44,16 +44,17 @@ class ApiGenerate extends Command
         $route  = $this->option('route');
         $module = $this->option('module');
         $conn   = $this->option('con');
+        $hasRelation = ($this->option('relation') != '0' );
     
         if($conn=='0'){
-            $this->makeModule($table, $route, $module);
+            $this->makeModule($table, $route, $module, false, $hasRelation);
         } else {
             $this->dbSettings = new DbSettings;
             $this->con = $conn;
             $tables = $this->dbSettings->getTables();
             if (!empty($tables)) {
                 foreach ($tables as $tableName) {
-                    $this->makeModule($tableName, $tableName, $module, $con);
+                    $this->makeModule($tableName, $tableName, $module, $con, $hasRelation);
                 }
             } else {
 		        $this->info('Empty connection '.$con.'!');
@@ -66,7 +67,7 @@ class ApiGenerate extends Command
      */
     }
 
-    private function makeModule($table, $route='0', $module='0', $con=false)
+    private function makeModule($table, $route='0', $module='0', $con=false, $hasRelation = false)
     {
         $module = ($module=='0')? 'General' : $module;
         $route  = ($route=='0')? $table : $route;
@@ -193,7 +194,7 @@ class '.$package.'Controller extends Controller
         $with = [];
         foreach ($filtersFields as $field) {
             if(substr($field, -3)=='_id') {
-                $verify = $this->findModels($module,$field, (($con)? true : false));
+                $verify = $this->findModels($module,$field, (($con || $hasRelation)? true : false));
                 if($verify){
                     $relations .= $verify;
                     $with[] = str_replace('_id','',$field);
