@@ -32,7 +32,7 @@ To create a new api resource run this command:
 ```php
 php artisan generate:api --table=table_name --relation=true
 ```
-You can see result in http://localhost:8000/api/table_table
+You can see result in http://localhost:8000/api/table_name
 You can find your new resource in app/Modules/General.
 General is the default 
 ### Params

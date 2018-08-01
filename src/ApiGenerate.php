@@ -400,12 +400,16 @@ Route::apiResource("'.$route.'","'.$base_package.'\Controllers\\'.$ctrl.'");';
             }
 
         }
+
         if(empty($model) && $all===true){
             $package = $this->setPackage($table);
             // Alternative model
             $model = "App\Modules\General\\$package\Models\\$package";
         }
-return (!empty($model)) ? '
+
+        $table_exists = Schema::getColumnListing($table);
+
+        return (!empty($model) && count($table_exists)>0) ? '
     public function '.$table.'(){
         return $this->hasMany("'.$model.'","id","'.$field.'");
     }
