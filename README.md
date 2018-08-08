@@ -1,5 +1,5 @@
 # phfoxer/apigenerate
-API Rest gerator for Laravel Framework.
+API Rest generator for Laravel Framework.
 Create your api resource in seconds using only your database table name or connection name.
 
 ## Installation
