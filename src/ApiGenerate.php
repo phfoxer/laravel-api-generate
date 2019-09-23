@@ -147,7 +147,7 @@ class '.$package.'Controller extends Controller
                 "code" => $e->getCode(),
                 "text "=>    $e->getMessage()
             ];
-            return response()->json($data, ($e->getCode()==0) ? 400 : $e->getCode());
+            return response()->json($data, 200);
         }
     }
 
@@ -161,7 +161,7 @@ class '.$package.'Controller extends Controller
                  "code" => $e->getCode(),
                 "text" =>    $e->getMessage()
             ];
-            return response()->json($data, ($e->getCode()==0) ? 400 : $e->getCode());
+            return response()->json($data, 200);
         }
     }
 
