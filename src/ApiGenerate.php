@@ -143,7 +143,7 @@ class '.$package.'Controller extends Controller
             return response()->json($data, 200);
         } catch(\Exception $e){
             $data = [
-                "message "=> "Error, try again!",
+                "message"=> "Error, try again!",
                 "code" => $e->getCode(),
                 "text "=>    $e->getMessage()
             ];
