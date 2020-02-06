@@ -303,9 +303,6 @@ foreach ($filtersFields as $field) {
 
 $repositorySearch = '<?php
 namespace App\\'.$module.'\\'.$package.'\Repositories;
-use App\\'.$module.'\\'.$package.'\Models\\'.$package.';
-
-use Illuminate\Http\Request;
 
 class '.$package.'SearchRepository
 {
