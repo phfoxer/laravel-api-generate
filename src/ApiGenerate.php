@@ -234,7 +234,7 @@ $Validator = '$validator = Validator::make($request->all(), [';
 foreach ($tableProp as $prop) {
     if(!in_array($prop[0]['name'], ["id","created_at", "updated_at"])){
         $Validator .= '
-            "'.$prop[0]['name'].'"=>"'.(($prop[0]['nullable']=='yes')? 'required' : 'nullable' ).'",';
+            "'.$prop[0]['name'].'"=>"'.(($prop[0]['nullable']=='no')? 'required' : 'nullable' ).'",';
     }
 }
 $Validator .= '
