@@ -301,6 +301,8 @@ foreach ($filtersFields as $field) {
     }
 }
 
+$orderByField = (isset($filtersFields[0])) ? $filtersFields[0] : 'id';
+
 $repositorySearch = '<?php
 namespace App\\'.$module.'\\'.$package.'\Repositories;
 
@@ -311,7 +313,7 @@ class '.$package.'SearchRepository
         
         if ($request->order) {
             $order = ($request->order == "asc") ? "asc" : "desc";
-            $queryBuilder->orderBy("'.(isset($filtersFields[0])) ? $filtersFields[0] : 'id'.'", $order);
+            $queryBuilder->orderBy("'.$orderByField.'", $order);
         }
 
         return $queryBuilder->paginate(($request->count) ? $request->count : 20);
