@@ -308,6 +308,12 @@ class '.$package.'SearchRepository
 {
     public function search($queryBuilder, $request){
 '.$filters.'
+        
+        if ($request->order) {
+            $order = ($request->order == "asc") ? "asc" : "desc";
+            $queryBuilder->orderBy("'.(isset($filtersFields[0])) ? $filtersFields[0] : 'id'.'", $order);
+        }
+
         return $queryBuilder->paginate(($request->count) ? $request->count : 20);
     }
 }';
