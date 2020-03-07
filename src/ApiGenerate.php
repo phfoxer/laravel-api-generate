@@ -112,70 +112,28 @@ class '.$package.'Controller extends Controller
     }
 
     public function index(Request $request){
-        try {
-            $data =  $this->'.$packageLower.'Repository->index($request);
-            return response()->json($data, 200);
-        } catch(\Exception $e){
-            $data = [
-                "message"=> "Error, try again!",
-                "text"=>    $e->getMessage()
-            ];
-            return response()->json($data, 401);
-        }
+        $data =  $this->'.$packageLower.'Repository->index($request);
+        return response()->json($data, 200);
     }
 
     public function show($id){
-        try {
-            $data = $this->'.$packageLower.'Repository->show($id);
-            return response()->json($data, 200);
-        } catch(\Exception $e){
-            $data = [
-                "message"=> "Error, try again!",
-                "text"=>    $e->getMessage()
-            ];
-            return response()->json($data, 400);
-        }
+        $data = $this->'.$packageLower.'Repository->show($id);
+        return response()->json($data, 200);
     }
 
     public function store(Request $request){
-        try {
-            $data = $this->'.$packageLower.'Repository->store($request);
-            return response()->json($data, 200);
-        } catch(\Exception $e){
-            $data = [
-                "message"=> "Error, try again!",
-                "code" => $e->getCode(),
-                "text "=>    $e->getMessage()
-            ];
-            return response()->json($data, 400);
-        }
+        $data = $this->'.$packageLower.'Repository->store($request);
+        return response()->json($data, 200);
     }
 
     public function update(Request $request, $id){
-        try {
-            $data = $this->'.$packageLower.'Repository->update($request, $id);
-            return response()->json($data, 200);
-        } catch(\Exception $e){
-            $data = [
-                "message" => "Error, try again!",
-                 "code" => $e->getCode(),
-                "text" =>    $e->getMessage()
-            ];
-            return response()->json($data, 400);
-        }
+        $data = $this->'.$packageLower.'Repository->update($request, $id);
+        return response()->json($data, 200);
     }
 
     public function destroy($id){
-        try {
-            $data = $this->'.$packageLower.'Repository->destroy($id);
-            return response()->json($data, 200);
-        } catch(\Exception $e){
-            $data = [
-                "message"=> "Error, try again!",
-                "text"=>    $e->getMessage()
-            ];
-            return response()->json($data, 400);
-        }
+        $data = $this->'.$packageLower.'Repository->destroy($id);
+        return response()->json($data, 200);
     }
 
 }';
@@ -265,8 +223,10 @@ class '.$package.'Repository
     public function store($request){
         '.$Validator.'
         if($validator->fails()){
-            throw new \Exception("invalid_fields",400);
-        } else {
+            throw new \Exception($validator->errors(),400);
+        } 
+        
+        if(!$validator->fails()){
             '.$dbFieldsTxt.'
             return '.$package.'::create($data);
         }
@@ -275,8 +235,10 @@ class '.$package.'Repository
     public function update($request, $id){
         '.$Validator.'
         if($validator->fails()){
-            throw new \Exception("invalid_fields",400);
-        } else {
+            throw new \Exception($validator->errors(),400);
+        } 
+
+        if(!$validator->fails()){
             '.$dbFieldsTxt.'
             return '.$package.'::where(["id"=>$id])->update($data);
         }
