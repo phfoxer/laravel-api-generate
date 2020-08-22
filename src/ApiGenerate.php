@@ -273,7 +273,7 @@ class ' . $package . 'SearchRepository
 {
     public function search($queryBuilder, $request){
 ' . $filters . '
-        
+
         if ($request->order) {
             $order = ($request->order == "asc") ? "asc" : "desc";
             $queryBuilder->orderBy("' . $orderByField . '", $order);
