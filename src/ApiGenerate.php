@@ -68,17 +68,13 @@ class ApiGenerate extends Command
          */
     }
 
-    private function makeModule($table, $route = '0', $module = '0', $con = false, $hasRelation = false)
+    private function makeModule($table, $route = '0', $con = false, $hasRelation = false)
     {
-        $module = ($module == '0') ? 'General' : $module;
+        $module = 'RestAPI';
         $route  = ($route == '0') ? $table : $route;
 
         $root = app_path() . DIRECTORY_SEPARATOR;
-        $app = $root . 'Modules' . DIRECTORY_SEPARATOR . $module . DIRECTORY_SEPARATOR;
-
-        if (@mkdir($root . 'Modules', 0755)) {
-            mkdir($root . 'Modules' . DIRECTORY_SEPARATOR . 'General', 0755);
-        }
+        $app = $root . $module . DIRECTORY_SEPARATOR;
 
         if (empty($table)) {
             $this->info("Table name not found! use --table=table_name");
@@ -89,11 +85,7 @@ class ApiGenerate extends Command
             $this->info("Route name not found! use --route=route-name");
             die;
         }
-        if ($module) {
-            $module = 'Modules' . DIRECTORY_SEPARATOR . $module;
-        } else {
-            $module = 'Modules';
-        }
+    
         $package = $this->setPackage($table);
 
         $packageLower = strtolower($package);
