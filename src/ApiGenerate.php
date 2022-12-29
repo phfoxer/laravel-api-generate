@@ -203,7 +203,7 @@ class ' . $package . ' extends Model
 namespace App\\' . $module . '\\' . $package . '\Repositories;
 use App\\' . $module . '\\' . $package . '\Models\\' . $package . ';
 use App\\' . $module . '\\' . $package . '\Repositories\\' . $package . 'SearchRepository;
-use Validator;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 
 class ' . $package . 'Repository
