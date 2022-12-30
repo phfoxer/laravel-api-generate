@@ -76,6 +76,10 @@ class ApiGenerate extends Command
         $root = app_path() . DIRECTORY_SEPARATOR;
         $app = $root . $module . DIRECTORY_SEPARATOR;
 
+        if (!is_dir($root . 'RestAPI')) {
+            mkdir($root . 'RestAPI', 0755);
+        }
+        
         if (empty($table)) {
             $this->info("Table name not found! use --table=table_name");
             die;
