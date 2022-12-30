@@ -279,10 +279,6 @@ class ' . $package . 'SearchRepository
     }
 }';
 
-        if (!is_dir($app)) {
-            $this->info('The module ' . $module . ' not exists');
-            die;
-        }
         $mod = $app . $package;
 
         if (@mkdir($mod, 0755)) {
