@@ -33,7 +33,7 @@ To create a new api resource run this command:
 php artisan generate:api --table=table_name --relation=true
 ```
 You can see result in http://localhost:8000/api/table_name
-You can find your new resource in app/Modules/General.
+You can find your new resource in app/RestAPI.
 General is the default 
 ### Params
 
@@ -46,9 +46,9 @@ php artisan generate:api --table=table_name --route=my-custom-route --relation=t
 To define module name:
 
 ```php
-php artisan generate:api --table=table_name --route=my-custom-route --module=Exemple --relation=true
+php artisan generate:api --table=table_name --route=my-custom-route --relation=true
 ```
-You can find your new resource in app/Modules/Exemple.
+You can find your new resource in app/RestAPI/Exemple.
 
 ## Postcardware
 
