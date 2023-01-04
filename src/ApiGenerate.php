@@ -200,7 +200,6 @@ namespace App\\' . $module . '\\' . $package . '\Repositories;
 use App\\' . $module . '\\' . $package . '\Models\\' . $package . ';
 use App\\' . $module . '\\' . $package . '\Repositories\\' . $package . 'SearchRepository;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Http\Request;
 
 class ' . $package . 'Repository
 {
@@ -209,7 +208,7 @@ class ' . $package . 'Repository
         $this->' . $packageLower . 'SearchRepository = $' . $packageLower . 'SearchRepository;
     }
 
-    public function index(Request $request){
+    public function index($request){
         return $this->' . $packageLower . 'SearchRepository->search(' . $package . '::with([' . $allRelations . ']), $request);
     }
 
@@ -247,10 +246,8 @@ class ' . $package . 'Repository
 
 }';
 
-        // 
-
-        $filters = "";
-        foreach ($filtersFields as $field) {
+    $filters = "";
+    foreach ($filtersFields as $field) {
             if (!in_array($field, ['created_at', 'updated_at'])) {
                 $filters .= '
     if ($request->' . $field . ') {
