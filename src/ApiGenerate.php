@@ -51,11 +51,11 @@ class ApiGenerate extends Command
             $this->makeModule($table, $route, $module, false, $hasRelation);
         } else {
             $this->dbSettings = new DbSettings;
-            $this->con = $conn;
+
             $tables = $this->dbSettings->getTables();
             if (!empty($tables)) {
                 foreach ($tables as $tableName) {
-                    $this->makeModule($tableName, $tableName, $module, $conn, $hasRelation);
+                    $this->makeModule($tableName, $route, $module, $conn, $hasRelation);
                 }
             } else {
                 $this->info('Empty connection ' . $conn . '!');
@@ -68,18 +68,19 @@ class ApiGenerate extends Command
          */
     }
 
-    private function makeModule($table, $route = '0', $con = false, $hasRelation = false)
+    private function makeModule($table, $route = '0', $module, $con = false, $hasRelation = false)
     {
-        $module = 'RestAPI';
+
+        $module = ($module == '0') ? 'RestAPI' : $module;
         $route  = ($route == '0') ? $table : $route;
 
         $root = app_path() . DIRECTORY_SEPARATOR;
         $app = $root . $module . DIRECTORY_SEPARATOR;
 
-        if (!is_dir($root . 'RestAPI')) {
-            mkdir($root . 'RestAPI', 0755);
+        if (!is_dir($root . $module)) {
+            mkdir($root . $module, 0755);
         }
-        
+
         if (empty($table)) {
             $this->info("Table name not found! use --table=table_name");
             die;
@@ -89,7 +90,7 @@ class ApiGenerate extends Command
             $this->info("Route name not found! use --route=route-name");
             die;
         }
-    
+
         $package = $this->setPackage($table);
 
         $packageLower = strtolower($package);
@@ -200,6 +201,7 @@ namespace App\\' . $module . '\\' . $package . '\Repositories;
 use App\\' . $module . '\\' . $package . '\Models\\' . $package . ';
 use App\\' . $module . '\\' . $package . '\Repositories\\' . $package . 'SearchRepository;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Http\Request;
 
 class ' . $package . 'Repository
 {
@@ -208,7 +210,7 @@ class ' . $package . 'Repository
         $this->' . $packageLower . 'SearchRepository = $' . $packageLower . 'SearchRepository;
     }
 
-    public function index($request){
+    public function index(Request $request){
         return $this->' . $packageLower . 'SearchRepository->search(' . $package . '::with([' . $allRelations . ']), $request);
     }
 
@@ -246,8 +248,10 @@ class ' . $package . 'Repository
 
 }';
 
-    $filters = "";
-    foreach ($filtersFields as $field) {
+        // 
+
+        $filters = "";
+        foreach ($filtersFields as $field) {
             if (!in_array($field, ['created_at', 'updated_at'])) {
                 $filters .= '
     if ($request->' . $field . ') {
@@ -319,55 +323,27 @@ Route::apiResource("' . $route . '","' . $base_package . '\Controllers\\' . $ctr
 
     private function findModels($module, $field, $all = false)
     {
+        if (!$all) {
+            return false;
+        }
+
+        $sep = DIRECTORY_SEPARATOR;
         if (substr($field, -3) != '_id') {
             return false;
         }
         $table = str_replace('_id', '', $field);
-        $root = app_path() . DIRECTORY_SEPARATOR;
-        $app = $root . $module . DIRECTORY_SEPARATOR;
-        $allModulesPath = $root . 'Modules' . DIRECTORY_SEPARATOR . "*";
-        $allModules = glob($allModulesPath, GLOB_ONLYDIR);
-        $allModulePath = [];
-        $allPackagePath = [];
-        foreach ($allModules as $modulesPath) {
-            $allModulePath = glob($modulesPath . DIRECTORY_SEPARATOR . "*", GLOB_ONLYDIR);
-            foreach ($allModulePath as $packages) {
-                $temp = glob($packages . DIRECTORY_SEPARATOR . "*", GLOB_ONLYDIR);
-                $allPackagePath = array_merge($allPackagePath, $temp);
-                $allPackagePath = array_filter($allPackagePath, function ($item) {
-                    return (substr_count($item, 'Models')) ? $item : false;
-                });
-            }
-        }
-        $model = '';
-        $files = [];
-        foreach ($allPackagePath as $models) {
-            $files = glob($models . DIRECTORY_SEPARATOR . "*.php");
-            foreach ($files as $file) {
-                $content = File::get($file);
-                if (substr_count($content, '"' . $table . '"')) {
-                    $className = explode('class ', $content);
-                    $className = explode(' extends', $className[1]);
-                    $model = $models . DIRECTORY_SEPARATOR . $className[0];
-                    $model =  explode('app', $model);
-                    $model =  'App' . $model[1];
-                }
-            }
-        }
+        $root = app_path() . $sep;
 
-        if (empty($model) && $all === true) {
-            $package = $this->setPackage($table);
-            // Alternative model
-            $model = "App\Modules\General\\$package\Models\\$package";
-        }
-
-        $table_exists = Schema::getColumnListing($table);
-
-        return (!empty($model) && count($table_exists) > 0) ? '
+        $words = str_replace(' ', '', ucwords(str_replace('_', ' ', $table)));
+        $packagePath = $root . $module  . $sep . $words;
+        if (is_dir($packagePath)) {
+            return
+                '
     public function ' . $table . '(){
-        return $this->hasMany("' . $model . '","id","' . $field . '");
-    }
-' : false;
+        return $this->hasMany(' . $sep . 'App' . $sep . $module . $sep . $words . $sep . 'Models' . $sep . $words . '::class);
+    }';
+        }
+        return false;
     }
 
     private function setPackage($table)
