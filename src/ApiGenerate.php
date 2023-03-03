@@ -97,7 +97,6 @@ class ApiGenerate extends Command
         $controller = '<?php
 namespace App\\' . $module . '\\' . $package . '\Controllers;
 
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\\' . $module . '\\' . $package . '\Repositories\\' . $package . 'Repository;
 
@@ -109,7 +108,7 @@ class ' . $package . 'Controller extends Controller
         $this->' . $packageLower . 'Repository = $' . $packageLower . 'Repository;
     }
 
-    public function index(Request $request){
+    public function index($request){
         $data =  $this->' . $packageLower . 'Repository->index($request);
         return response()->json($data, 200);
     }
@@ -186,7 +185,7 @@ class ' . $package . ' extends Model
         // Validator
         $this->dbSettings = new DbSettings();
         $tableProp = $this->dbSettings->getTableProp($table);
-        $Validator = '$validator = Validator::make($request->all(), [';
+        $Validator = '$request->validate([';
         foreach ($tableProp as $prop) {
             if (!in_array($prop[0]['name'], ["id", "created_at", "updated_at"])) {
                 $Validator .= '
@@ -200,7 +199,6 @@ class ' . $package . ' extends Model
 namespace App\\' . $module . '\\' . $package . '\Repositories;
 use App\\' . $module . '\\' . $package . '\Models\\' . $package . ';
 use App\\' . $module . '\\' . $package . '\Repositories\\' . $package . 'SearchRepository;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 
 class ' . $package . 'Repository
@@ -219,30 +217,29 @@ class ' . $package . 'Repository
     }
 
     public function store($request){
-        ' . $Validator . '
-        if($validator->errors()->count()){
-            throw new \Exception($validator->errors()->first(),400);
-        } 
-        
-        if(!$validator->errors()->count()){
+        try {
+            ' . $Validator . '
             ' . $dbFieldsTxt . '
             return ' . $package . '::create($data);
+        } catch (\Throwable $th) {
+            throw $th;
         }
+        
     }
 
     public function update($request, $id){
-        ' . $Validator . '
-        if($validator->errors()->count()){
-            throw new \Exception($validator->errors()->first(),400);
-        } 
-
-        if(!$validator->errors()->count()){
+        try {
+            // $user = auth()->user();
+            ' . $Validator . '
             ' . $dbFieldsTxt . '
             return ' . $package . '::where(["id"=>$id])->update($data);
+        } catch (\Throwable $th) {
+            throw $th;
         }
     }
 
     public function destroy($id){
+        // $user = auth()->user();
     	return ' . $package . '::where(["id"=>$id])->delete();
     }
 
