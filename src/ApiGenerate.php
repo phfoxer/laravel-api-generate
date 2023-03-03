@@ -229,7 +229,7 @@ class ' . $package . 'Repository
 
     public function update($request, $id){
         try {
-            // $user = auth()->user();
+            # $user = auth()->user();
             ' . $Validator . '
             ' . $dbFieldsTxt . '
             return ' . $package . '::where(["id"=>$id])->update($data);
@@ -239,7 +239,7 @@ class ' . $package . 'Repository
     }
 
     public function destroy($id){
-        // $user = auth()->user();
+        # $user = auth()->user();
     	return ' . $package . '::where(["id"=>$id])->delete();
     }
 
