@@ -99,6 +99,7 @@ namespace App\\' . $module . '\\' . $package . '\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\\' . $module . '\\' . $package . '\Repositories\\' . $package . 'Repository;
+use Illuminate\Http\Request;
 
 class ' . $package . 'Controller extends Controller
 {
@@ -108,7 +109,7 @@ class ' . $package . 'Controller extends Controller
         $this->' . $packageLower . 'Repository = $' . $packageLower . 'Repository;
     }
 
-    public function index($request){
+    public function index(Request $request){
         $data =  $this->' . $packageLower . 'Repository->index($request);
         return response()->json($data, 200);
     }
